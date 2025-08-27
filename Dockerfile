@@ -1,19 +1,22 @@
-﻿# Use the .NET 8 SDK image to build
+﻿# ---------- Build stage ----------
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 WORKDIR /src
 
-# Copy the csproj and restore
-COPY ECommerceWebApp/ECommerceWebApp.csproj ./ECommerceWebApp/
-RUN dotnet restore ./ECommerceWebApp/ECommerceWebApp.csproj
+# copy only csproj first (for cache efficiency)
+COPY ECommerceWebApp.csproj ./
+RUN dotnet restore
 
-# Copy the rest of the code
-COPY ECommerceWebApp ./ECommerceWebApp
+# copy the rest of the code
+COPY . ./
+RUN dotnet publish -c Release -o /app/out
 
-WORKDIR /src/ECommerceWebApp
-RUN dotnet publish -c Release -o /app/publish
-
-# Build runtime image
-FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS runtime
+# ---------- Runtime stage ----------
+FROM mcr.microsoft.com/dotnet/aspnet:8.0
 WORKDIR /app
-COPY --from=build /app/publish .
+
+# copy published app
+COPY --from=build /app/out ./
+
+# Render sets $PORT dynamically, so bind to it
+ENV ASPNETCORE_URLS=http://+:$PORT
 ENTRYPOINT ["dotnet", "ECommerceWebApp.dll"]
