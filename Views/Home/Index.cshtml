@@ -1,0 +1,157 @@
+﻿@model List<ECommerceWebApp.Models.Product>
+@{
+    ViewData["Title"] = "Welcome to ShopEase";
+}
+
+<!-- Hero Banner -->
+<div class="container-fluid bg-primary text-white py-5 text-center">
+    <h1 class="display-4 fw-bold">Welcome to ShopEase</h1>
+    <p class="lead">Your one-stop shop for the latest products at unbeatable prices!</p>
+    <a asp-controller="Products" asp-action="ProductsCardView" class="btn btn-light btn-lg mt-3 shadow-sm">Shop Now</a>
+</div>
+
+<!-- Featured Products Carousel -->
+<div class="container my-5">
+    <h2 class="text-center mb-4 text-dark fw-semibold">Featured Products</h2>
+    <div id="featuredCarousel" class="carousel slide" data-bs-ride="carousel">
+        <div class="carousel-inner">
+            <!-- Slide 1 -->
+            <div class="carousel-item active">
+                <div class="row text-center">
+                    <div class="col-md-4">
+                        <img src="~/images/product1.jpg" class="carousel-img rounded shadow-sm mb-3" alt="Product 1">
+                        <h5>Wireless Headphones</h5>
+                        <p class="text-primary fw-bold">$49.99</p>
+                    </div>
+                    <div class="col-md-4">
+                        <img src="~/images/product2.jpg" class="carousel-img rounded shadow-sm mb-3" alt="Product 2">
+                        <h5>Smart Watch</h5>
+                        <p class="text-primary fw-bold">$79.99</p>
+                    </div>
+                    <div class="col-md-4">
+                        <img src="~/images/product3.jpg" class="carousel-img rounded shadow-sm mb-3" alt="Product 3">
+                        <h5>Bluetooth Speaker</h5>
+                        <p class="text-primary fw-bold">$39.99</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Slide 2 -->
+            <div class="carousel-item">
+                <div class="row text-center">
+                    <div class="col-md-4">
+                        <img src="~/images/product4.jpg" class="carousel-img rounded shadow-sm mb-3" alt="Product 4">
+                        <h5>Fitness Tracker</h5>
+                        <p class="text-primary fw-bold">$29.99</p>
+                    </div>
+                    <div class="col-md-4">
+                        <img src="~/images/product5.jpg" class="carousel-img rounded shadow-sm mb-3" alt="Product 5">
+                        <h5>Gaming Mouse</h5>
+                        <p class="text-primary fw-bold">$24.99</p>
+                    </div>
+                    <div class="col-md-4">
+                        <img src="~/images/product6.jpg" class="carousel-img rounded shadow-sm mb-3" alt="Product 6">
+                        <h5>Portable Charger</h5>
+                        <p class="text-primary fw-bold">$19.99</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Carousel Controls -->
+        <button class="carousel-control-prev" type="button" data-bs-target="#featuredCarousel" data-bs-slide="prev">
+            <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+            <span class="visually-hidden">Previous</span>
+        </button>
+        <button class="carousel-control-next" type="button" data-bs-target="#featuredCarousel" data-bs-slide="next">
+            <span class="carousel-control-next-icon" aria-hidden="true"></span>
+            <span class="visually-hidden">Next</span>
+        </button>
+    </div>
+</div>
+
+<!-- Product Grid -->
+<div class="container my-5">
+    <h2 class="text-center mb-4 text-dark fw-semibold">All Products</h2>
+    <div class="row g-4">
+        @foreach (var product in Model)
+        {
+            <div class="col-sm-6 col-md-4">
+                <div class="card h-100 border-1 shadow-lg product-card">
+                    <img src="~/images/products/@product.ImageUrl" class="card-img-top" alt="@product.Name">
+                    <div class="card-body d-flex flex-column">
+                        <h5 class="card-title text-dark">@product.Name</h5>
+                        <p class="card-text text-muted">@product.Description</p>
+                        <p class="fw-bold text-primary mb-2">₹@product.Price</p>
+                        <div class="mt-auto d-flex gap-2">
+                            <a href="@Url.Action("Details", "Home", new { id = product.ProductId })" class="btn btn-outline-info btn-sm">Details</a>
+                            <button class="btn btn-success btn-sm" onclick="AddToCart('@product.ProductId')">Add to Cart</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        function AddToCart(productId) {
+            $.ajax({
+                type: "POST",
+                url: '/CartItems/AddCartItem',
+                contentType: 'application/json',
+                data: JSON.stringify({ productId: productId, quantity: 1 }),
+                success: function (response) {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Added!',
+                        text: response.message,
+                        timer: 1500,
+                        showConfirmButton: false
+                    });
+                },
+                error: function (xhr) {
+                    let errMsg = "An error occurred.";
+                    try {
+                        let res = JSON.parse(xhr.responseText);
+                        errMsg = res.message || errMsg;
+                    } catch { }
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Oops...',
+                        text: errMsg
+                    });
+                }
+            });
+        }
+    </script>
+}
+
+<style>
+    .carousel-img {
+        height: 240px;
+        width: 100%;
+        object-fit: cover;
+        transition: transform 0.3s ease;
+    }
+
+    .carousel-img:hover {
+        transform: scale(1.03);
+    }
+
+    .product-card {
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .product-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.12);
+    }
+
+    .card-img-top {
+        height: 200px;
+        object-fit: cover;
+    }
+</style>

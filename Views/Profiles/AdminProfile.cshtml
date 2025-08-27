@@ -1,0 +1,88 @@
+﻿@model ECommerceWebApp.Models.Admin
+
+@{
+    ViewData["Title"] = "My Profile";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<div class="container mt-5">
+    <div class="card shadow border-0 rounded-4">
+        <div class="card-header bg-dark text-white rounded-top-4 py-3">
+            <h4 class="mb-0"><i class="bi bi-person-badge-fill me-2"></i>Admin Profile</h4>
+        </div>
+
+        <form asp-action="UpdateProfile" asp-controller="Profiles" method="post" class="card-body">
+            <input type="hidden" asp-for="AdminId" />
+            <div class="row g-4">
+                <div class="col-md-12">
+                    <div class="mb-3">
+                        <label asp-for="FullName" class="form-label">Full Name</label>
+                        <input asp-for="FullName" class="form-control" />
+                        <span asp-validation-for="FullName" class="text-danger"></span>
+                    </div>
+                    <div class="mb-3">
+                        <label asp-for="Email" class="form-label">Email</label>
+                        <input asp-for="Email" class="form-control" readonly />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Old Password</label>
+                        <div class="input-group">
+                            <input type="password" id="oldPassword" class="form-control" placeholder="Enter old password" />
+                        </div>
+                    </div>
+                    <!-- Change Password -->
+                    <div class="mb-3">
+                        <label class="form-label">New Password</label>
+                        <div class="input-group">
+                            <input type="password" id="newPassword" class="form-control" placeholder="Enter new password" />
+                            <button type="button" class="btn btn-outline-secondary" onclick="changePassword('@Model.AdminId')">
+                                <i class="bi bi-key-fill me-1"></i>Change Password
+                            </button>
+                        </div>
+                        <div id="changePasswordStatus" class="form-text text-success mt-1"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mt-4 d-flex justify-content-end gap-3">
+                <button type="submit" class="btn btn-success disabled px-4">
+                    <i class="bi bi-save2 me-1"></i> Save Changes
+                </button>
+                <a asp-action="Dashboard" asp-controller="Users" class="btn btn-outline-secondary px-4">
+                    <i class="bi bi-x-circle me-1"></i> Cancel
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function changePassword(adminId) {
+            const oldPassword = document.getElementById("oldPassword").value;
+            const newPassword = document.getElementById("newPassword").value;
+            if (!oldPassword) {
+                alert("Please enter a old password.");
+                return;
+            }
+            if (!newPassword) {
+                alert("Please enter a new password.");
+                return;
+            }
+
+            $.ajax({
+                type: "POST",
+                url: '/Profiles/ChangePassword',
+                data: { id: adminId ,newPassword: newPassword,oldPassword: oldPassword },
+                success: function (res) {
+                    if (res.success) {
+                        document.getElementById("changePasswordStatus").innerText = "Password updated successfully.";
+                    }
+                },
+                error: function () {
+                    alert("Error updating password.");
+                }
+            });
+        }
+    </script>
+}

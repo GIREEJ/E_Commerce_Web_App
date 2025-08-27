@@ -1,0 +1,141 @@
+﻿@model List<ECommerceWebApp.Models.Product>
+
+@{
+    ViewData["Title"] = "Explore Products";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+    body {
+        font-family: 'Poppins', sans-serif;
+    }
+
+    .product-card {
+        border: none;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        transition: transform 0.2s;
+    }
+
+        .product-card:hover {
+            transform: translateY(-5px);
+        }
+
+    .product-img {
+        height: 230px;
+        object-fit: cover;
+        border-top-left-radius: .5rem;
+        border-top-right-radius: .5rem;
+    }
+
+    .badge-stock {
+        font-size: 0.8rem;
+    }
+
+    .card-title {
+        font-size: 1.2rem;
+        font-weight: 600;
+    }
+
+    .btn-sm {
+        padding: .375rem .75rem;
+        font-size: .875rem;
+    }
+</style>
+
+<div class="container my-5 p-5 rounded" style="background-color: #f8f9fa;">
+    <h2 class="text-center mb-5 fw-bold" style="font-family: 'Playfair Display', serif;">
+        Explore Our Products
+    </h2>
+
+    <div class="row g-4">
+        @foreach (var product in Model)
+        {
+            <div class="col-md-6 col-lg-4">
+                <div class="card product-card h-100 position-relative">
+                    @if (product.Stock < 20)
+                    {
+                        <span class="position-absolute top-0 start-0 m-2 badge bg-warning text-dark badge-stock">Limited Stock</span>
+                    }
+
+                    <img src="~/images/products/@product.ImageUrl" class="card-img-top product-img" alt="@product.Name" />
+
+                    <div class="card-body d-flex flex-column">
+                        <h5 class="card-title">@product.Name</h5>
+                        <p class="card-text text-muted" style="min-height: 40px;">@product.Description</p>
+                        <p class="text-success fw-bold fs-5 mb-1">₹@product.Price.ToString("F2")</p>
+
+                        @if (product.Stock > 0)
+                        {
+                            <p class="text-success mb-2"><i class="fas fa-box"></i> In Stock: @product.Stock</p>
+                        }
+                        else
+                        {
+                            <p class="text-danger mb-2"><i class="fas fa-times-circle"></i> Out of Stock</p>
+                        }
+
+                        <div class="mt-auto d-flex justify-content-between">
+                            <a href="@Url.Action("ProdDetails", "Products", new { id = product.ProductId })" class="btn btn-outline-info btn-sm">
+                                <i class="fas fa-info-circle me-1"></i> Details
+                            </a>
+
+                            @if (Context.Session.GetString("Role") == "User" && product.Stock > 0)
+                            {
+                                <button onclick="AddToCart('@product.ProductId')" class="btn btn-success btn-sm">
+                                    <i class="fas fa-cart-plus me-1"></i> Add to Cart
+                                </button>
+                            }
+                            else if (string.IsNullOrEmpty(Context.Session.GetString("Role")))
+                            {
+                                <a asp-action="Login" asp-controller="Account" class="btn btn-outline-primary btn-sm">
+                                    <i class="fas fa-sign-in-alt me-1"></i> Login
+                                </a>
+                            }
+                            else
+                            {
+                                <button class="btn btn-secondary btn-sm" disabled>Not Available</button>
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        function AddToCart(productId) {
+            $.ajax({
+                type: "POST",
+                url: '/CartItems/AddCartItem',
+                contentType: 'application/json',
+                data: JSON.stringify({
+                    productId: productId,
+                    quantity: 1
+                }),
+                success: function (response) {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Added to Cart!',
+                        text: response.message,
+                        timer: 1500,
+                        showConfirmButton: false
+                    });
+                },
+                error: function (xhr) {
+                    let errMsg = "An error occurred.";
+                    if (xhr.responseJSON && xhr.responseJSON.message) {
+                        errMsg = xhr.responseJSON.message;
+                    }
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Oops...',
+                        text: errMsg
+                    });
+                }
+            });
+        }
+    </script>
+}

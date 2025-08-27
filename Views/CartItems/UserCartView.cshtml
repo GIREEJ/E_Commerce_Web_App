@@ -1,0 +1,129 @@
+﻿@model IEnumerable<ECommerceWebApp.Models.CartItem>
+
+@{
+    ViewData["Title"] = "My Cart";
+    Layout = "~/Views/Shared/_Layout.cshtml"; // Use user layout instead of admin
+    var total = Model.Sum(item => (item.Product?.Price ?? 0) * item.Quantity);
+}
+<input type="hidden" id="userEmail" value="@ViewBag.Email" />
+<div class="container py-5">
+    <h2 class="fw-bold mb-4 text-center">Your Shopping Cart</h2>
+
+    @if (!Model.Any())
+    {
+        <div class="alert alert-info text-center">
+            <i class="fas fa-info-circle me-2"></i> Your cart is empty. Start adding some products!
+        </div>
+    }
+    else
+    {
+
+        <div class="table-responsive">
+            <table class="table table-hover align-middle">
+                <thead class="table-light">
+                    <tr class="text-center">
+                        <th>Product</th>
+                        <th>Image</th>
+                        <th>Price</th>
+                        <th>Quantity</th>
+                        <th>Subtotal</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model)
+                    {
+                        var unitPrice = item.Product?.Price ?? 0;
+                        var subtotal = unitPrice * item.Quantity;
+
+                        <tr class="text-center">
+                            <td class="text-start">
+                                <strong>@item.Product?.Name</strong><br />
+                                <small class="text-muted">@item.Product?.Category</small>
+                            </td>
+                            <td>
+                                <img src="~/images/products/@item.Product?.ImageUrl" alt="@item.Product?.Name" width="60" class="rounded" />
+                            </td>
+                            <td>@unitPrice.ToString("C", System.Globalization.CultureInfo.GetCultureInfo("en-IN"))</td>
+                            <td>@item.Quantity</td>
+                            <td>@subtotal.ToString("C", System.Globalization.CultureInfo.GetCultureInfo("en-IN"))</td>
+                            <td>
+                                <a asp-action="Edit" asp-route-id="@item.ProductId" class="btn btn-sm btn-outline-warning me-1">
+                                    <i class="fas fa-edit"></i>
+                                </a>
+                                <a asp-action="Delete" asp-route-id="@item.ProductId" class="btn btn-sm btn-outline-danger">
+                                    <i class="fas fa-trash"></i>
+                                </a>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        <div class="text-end mt-4">
+            <h4>Total: <span class="text-success fw-bold">@total.ToString("C", System.Globalization.CultureInfo.GetCultureInfo("en-IN"))</span></h4>
+            <button class="btn btn-primary btn-lg mt-2" onclick="Buy()">
+                <i class="fas fa-credit-card me-1"></i> Proceed to Checkout
+            </button>
+        </div>
+
+        <div class="d-flex justify-content-center mt-4">
+            <a asp-action="Index" asp-controller="Home" class="btn btn-secondary me-2 px-4">
+                <i class="fas fa-home me-1"></i> Go to Home
+            </a>
+            <a asp-action="ProductsCardView" asp-controller="Products" class="btn btn-success px-4">
+                <i class="fas fa-shopping-cart me-1"></i> Shop More Products
+            </a>
+        </div>
+
+    }
+</div>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+                function Buy() {
+            var email = $('#userEmail').val();
+
+            if (!email) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'User email not found',
+                    text: 'Please login again.'
+                });
+                return;
+            }
+
+            $.ajax({
+                type: "POST",
+                url: '/Orders/CartBuy',
+                contentType: 'application/json',
+                data: JSON.stringify({ email: email }),
+                success: function (response) {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Order Placed!',
+                        text: response.message,
+                        timer: 1500,
+                        showConfirmButton: false
+                    }).then(() => {
+                        window.location.href = '/OrderItems/MyOrder/' + response.orderId;
+                    });
+                },
+                error: function (xhr) {
+                    let errMsg = "An error occurred.";
+                    if (xhr.responseJSON && xhr.responseJSON.message) {
+                        errMsg = xhr.responseJSON.message;
+                    }
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Oops...',
+                        text: errMsg
+                    });
+                }
+            });
+        }
+
+    </script>
+}

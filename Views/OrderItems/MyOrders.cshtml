@@ -1,0 +1,131 @@
+﻿@model IEnumerable<ECommerceWebApp.Models.OrderItem>
+
+@{
+    ViewData["Title"] = "My Orders";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container mt-4">
+    <h2 class="text-center text-primary mb-4">Your Orders</h2>
+
+    @if (!Model.Any())
+    {
+        <div class="alert alert-info text-center shadow-sm">
+            <i class="bi bi-cart-x fs-4"></i> You haven’t placed any orders yet.
+        </div>
+    }
+    else
+    {
+       <div class="mb-3 row justify-content-center">
+    <div class="col-md-6">
+        <div class="input-group shadow-sm">
+            <input type="text" id="orderSearch" class="form-control" placeholder="Search by product name or order ID..." />
+            <button class="btn btn-outline-primary" type="button" id="searchButton">
+                <i class="bi bi-search"></i> Search
+            </button>
+        </div>
+    </div>
+</div>
+
+        <div class="table-responsive">
+            <table class="table table-bordered table-striped align-middle shadow-sm rounded-3" id="ordersTable">
+                <thead class="table-primary">
+                    <tr class="text-center">
+                        <th>Image</th>
+                        <th>Product</th>
+                        <th>Order ID</th>
+                        <th>Quantity</th>
+                        <th>Unit Price</th>
+                        <th>Total</th>
+                        <th>Ordered On</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model)
+                    {
+                        <tr>
+                            <td class="text-center">
+                                <img src="~/images/products/@item.Product.ImageUrl" alt="@item.Product.Name" width="60" height="60" style="object-fit: cover;" class="rounded" />
+                            </td>
+                            <td>@item.Product.Name</td>
+                            <td>@item.Order.OrderId</td>
+                            <td class="text-center">@item.Quantity</td>
+                            <td>₹@item.UnitPrice.ToString("0.00")</td>
+                            <td class="fw-bold text-success">₹@(item.UnitPrice * item.Quantity).ToString("0.00")</td>
+                            <td>@item.Order.OrderDate.ToString("dd MMM yyyy hh:mm tt")</td>
+                            <td class="text-center">
+                                <a asp-action="Details" asp-route-id="@item.OrderItemId" class="btn btn-sm btn-outline-info me-1">
+                                    <i class="bi bi-eye"></i>
+                                </a>
+                                <a asp-controller="Orders" asp-action="GenerateInvoice" asp-route-id="@item.Order.OrderId" class="btn btn-sm btn-outline-success">
+                                    <i class="bi bi-file-earmark-pdf"></i>
+                                </a>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        <div class="d-flex justify-content-center mt-3">
+            <ul class="pagination" id="pagination"></ul>
+        </div>
+    }
+
+    <div class="text-center mt-4">
+        <a asp-action="Index" asp-controller="Home" class="btn btn-secondary px-4 me-2">
+            <i class="bi bi-arrow-left"></i> Back to Home
+        </a>
+        <a asp-action="ProductsCardView" asp-controller="Products" class="btn btn-primary px-4">
+            <i class="bi bi-shop"></i> Shop More
+        </a>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // Search filter
+        $('#orderSearch').on('keyup', function () {
+            var value = $(this).val().toLowerCase();
+            $('#ordersTable tbody tr').filter(function () {
+                $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1);
+            });
+        });
+
+        // Pagination logic
+        const rowsPerPage = 5;
+        const rows = $('#ordersTable tbody tr');
+        const rowsCount = rows.length;
+        const pageCount = Math.ceil(rowsCount / rowsPerPage);
+        const pagination = $('#pagination');
+
+        let currentPage = 1;
+
+        function showPage(page) {
+            rows.hide();
+            rows.slice((page - 1) * rowsPerPage, page * rowsPerPage).show();
+        }
+
+        function setupPagination() {
+            pagination.empty();
+            for (let i = 1; i <= pageCount; i++) {
+                pagination.append(
+                    `<li class="page-item ${i === currentPage ? 'active' : ''}">
+                        <a href="#" class="page-link">${i}</a>
+                    </li>`
+                );
+            }
+
+            $('.page-link').on('click', function (e) {
+                e.preventDefault();
+                currentPage = parseInt($(this).text());
+                showPage(currentPage);
+                setupPagination();
+            });
+        }
+
+        showPage(currentPage);
+        setupPagination();
+    </script>
+}

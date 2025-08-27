@@ -1,0 +1,201 @@
+﻿@model ECommerceWebApp.Models.Product
+
+@{
+    ViewData["Title"] = "Product Details";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<input type="hidden" id="userEmail" value="@Context.Session.GetString("Email")" />
+<input type="hidden" id="prodId" value="@Model.ProductId" />
+@{
+    ViewBag.ProdCount = Model.Stock;
+}
+
+<div class="container my-5">
+    <div class="card shadow rounded-4 border-0 overflow-hidden">
+        <div class="row g-0">
+            <div class="col-md-6">
+                <div class="h-100 bg-light d-flex justify-content-center align-items-center p-3">
+                    <img src="~/images/products/@Model.ImageUrl" class="img-fluid rounded object-fit-contain" style="max-height: 400px;" alt="@Model.Name" />
+                </div>
+            </div>
+            <div class="col-md-6 p-4 d-flex flex-column justify-content-between">
+                <div>
+                    <h2 class="mb-3 fw-bold">@Model.Name</h2>
+                    <p class="text-muted mb-2"><strong>Description:</strong> @Model.Description</p>
+
+                    <p class="mb-3 fs-5">
+                        <span class="fw-semibold text-dark">Price:</span>
+                        <span class="text-success">₹@Model.Price.ToString("F2")</span>
+                    </p>
+
+                    @if (Model.Stock > 0)
+                    {
+                        <p class="mb-3">
+                            <span class="badge bg-success">In Stock: @Model.Stock</span>
+                            @if (Model.Stock < 20)
+                            {
+                                <span class="badge bg-warning text-dark ms-2">Limited Stock</span>
+                            }
+                        </p>
+                    }
+                    else
+                    {
+                        <p class="mb-3">
+                            <span class="badge bg-danger">Out of Stock</span>
+                        </p>
+                    }
+                </div>
+
+                <div class="mt-4 d-flex gap-3">
+                    <button class="btn btn-primary btn-lg mt-2" onclick="Buy()">
+                        <i class="fas fa-credit-card me-1"></i> Buy Now
+                    </button>
+                    <button class="btn btn-outline-secondary px-4" onclick="AddToCart(@Model.ProductId)" title="Add to cart for later">
+                        <i class="fas fa-cart-plus me-2"></i>Add to Cart
+                    </button>
+                    <a asp-action="ProductsCardView" class="btn btn-light px-4 ms-auto">
+                        <i class="fas fa-arrow-left me-1"></i>Back
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        // function Buy() {
+        //     var email = $('#userEmail').val();
+        //     var prodId = '@Model.ProductId';
+        //     var stock = @Model.Stock;
+
+        //     if (!email) {
+        //         Swal.fire({
+        //             icon: 'error',
+        //             title: 'Not Logged In',
+        //             text: 'Please login to buy this product.',
+        //             timer: 2000,
+        //             showConfirmButton: false
+        //         }).then(() => {
+        //             window.location.href = '/Account/Login/';
+        //         });
+        //         return;
+        //     }
+
+        //     if (stock <= 0) {
+        //         Swal.fire({
+        //             icon: 'error',
+        //             title: 'Out of Stock',
+        //             text: 'This product is currently unavailable. Please try later.',
+        //             timer: 3000,
+        //             showConfirmButton: false
+        //         }).then(() => {
+        //             window.location.href = '/Products/ProductsCardView/';
+        //         });
+        //         return;
+        //     }
+
+        //     $.ajax({
+        //         type: "POST",
+        //         url: '/Orders/Buy',
+        //         contentType: 'application/json',
+        //         data: JSON.stringify({
+        //             email: email,
+        //             productId: prodId
+        //         }),
+        //         success: function (response) {
+        //             console.log(response)
+        //             Swal.fire({
+        //                 icon: 'success',
+        //                 title: 'Order Placed!',
+        //                 text: response.message,
+        //                 timer: 1500,
+        //                 showConfirmButton: false
+        //             }).then(() => {
+        //                 window.location.href = response.redirectUrl;
+        //             });
+        //         },
+        //         error: function (xhr) {
+        //             let errMsg = xhr.responseJSON?.message || "An error occurred.";
+        //             Swal.fire({
+        //                 icon: 'error',
+        //                 title: 'Oops...',
+        //                 text: errMsg
+        //             });
+        //         }
+        //     });
+        // }
+
+
+        function Buy() {
+            var email = $('#userEmail').val();
+
+            if (!email) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'User email not found',
+                    text: 'Please login again.'
+                });
+                return;
+            }
+
+            $.ajax({
+                type: "POST",
+                url: '/Orders/CartBuy',
+                contentType: 'application/json',
+                data: JSON.stringify({ email: email }),
+                success: function (response) {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Order Placed!',
+                        text: response.message,
+                        timer: 1500,
+                        showConfirmButton: false
+                    }).then(() => {
+                        window.location.href = '/OrderItems/MyOrder/' + response.orderId;
+                    });
+                },
+                error: function (xhr) {
+                    let errMsg = "An error occurred.";
+                    if (xhr.responseJSON && xhr.responseJSON.message) {
+                        errMsg = xhr.responseJSON.message;
+                    }
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Oops...',
+                        text: errMsg
+                    });
+                }
+            });
+        }
+        function AddToCart(productId) {
+            $.ajax({
+                type: "POST",
+                url: '/CartItems/AddCartItem',
+                contentType: 'application/json',
+                data: JSON.stringify({
+                    productId: productId,
+                    quantity: 1
+                }),
+                success: function (response) {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Added!',
+                        text: response.message,
+                        timer: 1500,
+                        showConfirmButton: false
+                    });
+                },
+                error: function (xhr) {
+                    let errMsg = xhr.responseText || "An error occurred.";
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Oops...',
+                        text: errMsg
+                    });
+                }
+            });
+        }
+    </script>
+}

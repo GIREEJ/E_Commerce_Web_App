@@ -1,0 +1,147 @@
+﻿@*
+    Dashboard Layout View
+*@
+@{
+    Layout = null;
+}
+@{
+    var userImage = Context.Session.GetString("UserImage");
+    string imageUrl = !string.IsNullOrEmpty(userImage)
+    ? Url.Content($"~/Uploads/Images/User/{userImage}")
+    : Url.Content("~/Uploads/Images/User/default-admin.jfif");
+}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <title>@ViewData["Title"] - Admin Dashboard</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <!-- AdminLTE & Bootstrap 4.6 CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/admin-lte@3.2/dist/css/adminlte.min.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
+</head>
+<body class="hold-transition sidebar-mini">
+    <div class="wrapper">
+
+        <!-- Navbar -->
+        <nav class="main-header navbar navbar-expand navbar-dark bg-dark">
+            <ul class="navbar-nav">
+                <li class="nav-item">
+                    <a class="nav-link" data-widget="pushmenu" href="#" role="button"><i class="fas fa-bars"></i></a>
+                </li>
+                <li class="nav-item d-none d-sm-inline-block">
+                    <a asp-action="AdminDashboard" asp-controller="Dashboard" class="nav-link @(ViewContext.RouteData.Values["controller"].ToString() == "Dashboard" && ViewContext.RouteData.Values["action"].ToString() == "AdminDashboard" ? "active" : "")">Dashboard</a>
+                </li>
+            </ul>
+
+
+            <ul class="navbar-nav ml-auto">
+                <li class="nav-item d-none d-sm-inline-block"><a href="#" class="nav-link">Settings</a></li>
+                <li class="nav-item dropdown">
+                    <a class="nav-link" data-toggle="dropdown" href="#">
+                        <i class="far fa-bell"></i>
+                        <span class="badge badge-danger navbar-badge">15</span>
+                    </a>
+                    <div class="dropdown-menu dropdown-menu-lg dropdown-menu-right">
+                        <span class="dropdown-item dropdown-header">15 Notifications</span>
+                    </div>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" asp-action="AdminProfile" asp-controller="Profiles">
+                        <img src="@imageUrl" class="img-circle" width="30" height="30" style="object-fit:cover;" />
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link text-danger" asp-controller="Home" asp-action="Index">Logout</a>
+                </li>
+            </ul>
+
+        </nav>
+
+        <!-- Sidebar -->
+        <aside class="main-sidebar sidebar-dark-primary elevation-4">
+            <a href="#" class="brand-link">
+                <span class="brand-text font-weight-light">Admin Panel</span>
+            </a>
+            <div class="sidebar">
+                <nav class="mt-2">
+                    <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu">
+
+                        <li class="nav-item d-none d-sm-inline-block">
+                            <a asp-action="AdminDashboard" asp-controller="Dashboard" class="nav-link @(ViewContext.RouteData.Values["controller"].ToString() == "Dashboard" && ViewContext.RouteData.Values["action"].ToString() == "AdminDashboard" ? "active" : "")">
+                                <i class="fas fa-user-shield nav-icon"></i> Dashboard
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a asp-controller="Categories" asp-action="Index" class="nav-link @(ViewContext.RouteData.Values["controller"].ToString() == "Categories" && ViewContext.RouteData.Values["action"].ToString() == "Index" ? "active" : "")">
+                                <i class="nav-icon fas fa-cube"></i><p>Categories</p>
+
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a asp-controller="Products" asp-action="Index" class="nav-link @(ViewContext.RouteData.Values["controller"].ToString() == "Products" && ViewContext.RouteData.Values["action"].ToString() == "Index" ? "active" : "")">
+                                <i class="nav-icon fas fa-cube"></i><p>Products</p>
+
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a asp-controller="Orders" asp-action="Index" class="nav-link @(ViewContext.RouteData.Values["controller"].ToString() == "Orders" && ViewContext.RouteData.Values["action"].ToString() == "Index" ? "active" : "")">
+                                <i class="nav-icon fas fa-cube"></i><p>Orders</p>
+
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a asp-controller="OrderItems" asp-action="Index" class="nav-link @(ViewContext.RouteData.Values["controller"].ToString() == "OrderItems" && ViewContext.RouteData.Values["action"].ToString() == "Index" ? "active" : "")">
+                                <i class="nav-icon fas fa-cube"></i><p>Order Items</p>
+
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a asp-controller="CartItems" asp-action="Index" class="nav-link @(ViewContext.RouteData.Values["controller"].ToString() == "CartItems" && ViewContext.RouteData.Values["action"].ToString() == "Index" ? "active" : "")">
+                                <i class="nav-icon fas fa-cube"></i><p>Cart Items</p>
+
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a asp-controller="Users" asp-action="Index" class="nav-link @(ViewContext.RouteData.Values["controller"].ToString() == "Users" && ViewContext.RouteData.Values["action"].ToString() == "Index" ? "active" : "")">
+                                <i class="nav-icon fas fa-users"></i><p>Users</p>
+                            </a>
+                        </li>
+                    </ul>
+                    <hr />
+                    <a asp-controller="Home" asp-action="Index" class="btn btn-outline-danger mb-2 w-100">
+                        <i class="fas fa-sign-out-alt mr-1"></i> Logout
+                    </a>
+                </nav>
+            </div>
+        </aside>
+
+        <!-- Content Wrapper -->
+        <div class="content-wrapper">
+            @* <div class="content-header">
+                <div class="container-fluid">
+                    <h1 class="m-0">Dashboard</h1>
+                </div>
+            </div> *@
+            <div class="content">
+                <div class="container-fluid">
+                    @RenderBody()
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <footer class="main-footer text-center">
+            <strong>&copy; 2025 Admin Dashboard</strong> All rights reserved.
+        </footer>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/admin-lte@3.2/dist/js/adminlte.min.js"></script>
+    @RenderSection("Scripts", required: false)
+</body>
+</html>

@@ -1,0 +1,66 @@
+﻿@model RegisterAdminVM
+@{
+    ViewData["Title"] = "Register Admin";
+}
+
+<h2>Register Admin</h2>
+
+<form asp-action="RegisterAdmin" asp-controller="Account" method="post" enctype="multipart/form-data">
+    @Html.AntiForgeryToken()
+
+    <div class="mb-3">
+        <label asp-for="FullName" class="form-label"></label>
+        <input asp-for="FullName" class="form-control" />
+        <span asp-validation-for="FullName" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="Email" class="form-label"></label>
+        <input asp-for="Email" class="form-control" />
+        <span asp-validation-for="Email" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="Password" class="form-label"></label>
+        <input asp-for="Password" type="password" class="form-control" />
+        <span asp-validation-for="Password" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="ConfirmPassword" class="form-label"></label>
+        <input asp-for="ConfirmPassword" type="password" class="form-control" />
+        <span asp-validation-for="ConfirmPassword" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="AccessId" class="form-label"></label>
+        <input asp-for="AccessId" class="form-control" />
+        <span asp-validation-for="AccessId" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="AccessPassword" class="form-label"></label>
+        <input asp-for="AccessPassword" type="password" class="form-control" />
+        <span asp-validation-for="AccessPassword" class="text-danger"></span>
+    </div>
+
+    <button type="submit" class="btn btn-primary">Register</button>
+</form>
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        @if (TempData["RegistrationSuccess"] != null)
+        {
+            <text>
+                                    Swal.fire('Success', '@TempData["RegistrationSuccess"]', 'success');
+            </text>
+        }
+        else if (TempData["RegistrationError"] != null)
+        {
+            <text>
+                                Swal.fire('Error', '@TempData["RegistrationError"]', 'error');
+            </text>
+        }
+    </script>
+}

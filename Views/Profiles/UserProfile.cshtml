@@ -1,0 +1,117 @@
+﻿@model ECommerceWebApp.Models.User
+@{
+    ViewData["Title"] = "User Profile";
+}
+
+<h2 class="mb-4">Edit Your Profile</h2>
+
+<form asp-action="UpdateUserProfile" asp-controller="Profiles" method="post" enctype="multipart/form-data">
+    <input type="hidden" asp-for="UserId" />
+
+    <div class="form-group">
+        <label asp-for="FirstName"></label>
+        <input asp-for="FirstName" class="form-control" />
+        <span asp-validation-for="FirstName" class="text-danger"></span>
+    </div>
+
+    <div class="form-group">
+        <label asp-for="LastName"></label>
+        <input asp-for="LastName" class="form-control" />
+        <span asp-validation-for="LastName" class="text-danger"></span>
+    </div>
+
+    <div class="form-group">
+        <label asp-for="Gender"></label>
+        <select asp-for="Gender" class="form-control">
+            <option value="">-- Select Gender --</option>
+            <option value="Male">Male</option>
+            <option value="Female">Female</option>
+        </select>
+        <span asp-validation-for="Gender" class="text-danger"></span>
+    </div>
+
+    <div class="form-group">
+        <label asp-for="DateOfBirth"></label>
+        <input asp-for="DateOfBirth" type="date" class="form-control" />
+        <span asp-validation-for="DateOfBirth" class="text-danger"></span>
+    </div>
+
+    <div class="form-group">
+        <label asp-for="Mobile"></label>
+        <input asp-for="Mobile" class="form-control" />
+        <span asp-validation-for="Mobile" class="text-danger"></span>
+    </div>
+
+    <div class="form-group">
+        <label asp-for="Address"></label>
+        <textarea asp-for="Address" class="form-control"></textarea>
+        <span asp-validation-for="Address" class="text-danger"></span>
+    </div>
+
+    <div class="form-group">
+        <label asp-for="CountryId">Country</label>
+        <select asp-for="CountryId" class="form-control" asp-items="ViewBag.Countries" id="ddlCountry">
+            <option value="">-- Select Country --</option>
+        </select>
+    </div>
+
+    <div class="form-group">
+        <label asp-for="StateId">State</label>
+        <select asp-for="StateId" class="form-control" asp-items="ViewBag.States" id="ddlState">
+            <option value="">-- Select State --</option>
+        </select>
+    </div>
+
+    <div class="form-group">
+        <label asp-for="CityId">City</label>
+        <select asp-for="CityId" class="form-control" asp-items="ViewBag.Cities" id="ddlCity">
+            <option value="">-- Select City --</option>
+        </select>
+    </div>
+   
+    <div class="form-group">
+        <label>Profile Image</label><br />
+        @if (!string.IsNullOrEmpty(Model.ImagePath))
+        {
+            <img src="@Url.Content(Model.ImagePath)" width="100" height="100" class="rounded-circle mb-2" />
+        }
+        <input type="file" name="ImageFile" class="form-control" />
+    </div>
+
+    <button type="submit" class="btn btn-primary">Update Profile</button>
+    <a asp-action="Index" asp-controller="Home" class="btn btn-outline-secondary px-4">
+        <i class="bi bi-x-circle me-1"></i> Cancel
+    </a>
+</form>
+@section Scripts {
+
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+    <script>
+        $(function () {
+            $('#ddlCountry').change(function () {
+                var countryId = $(this).val();
+                $('#ddlState').empty().append('<option>Loading...</option>');
+                $.get('/Location/GetStates', { countryId: countryId }, function (data) {
+                    $('#ddlState').empty().append('<option value="">-- Select State --</option>');
+                    $.each(data, function (i, state) {
+                        $('#ddlState').append(`<option value="${state.stateId}">${state.stateName}</option>`);
+                    });
+                });
+            });
+
+            $('#ddlState').change(function () {
+                var stateId = $(this).val();
+                $('#ddlCity').empty().append('<option>Loading...</option>');
+                $.get('/Location/GetCities', { stateId: stateId }, function (data) {
+                    $('#ddlCity').empty().append('<option value="">-- Select City --</option>');
+                    $.each(data, function (i, city) {
+                        $('#ddlCity').append(`<option value="${city.cityId}">${city.cityName}</option>`);
+                    });
+                });
+            });
+        });
+    </script>
+}

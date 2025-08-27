@@ -1,0 +1,81 @@
+﻿@model IEnumerable<ECommerceWebApp.Models.Product>
+
+@{
+    ViewData["Title"] = "Product List";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<div class="container m-5 p-5">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h2 class="mb-0">Product List</h2>
+       
+        <a class="btn btn-success" asp-action="Create"><i class="fas fa-plus-circle me-1"></i>Add New Product</a>
+    </div>
+    <div>
+        <form asp-action="Index" method="get" class="row g-2 mb-3">
+            <div class="col-md-4">
+                <input type="text" name="name" value="@Context.Request.Query["name"]"
+                       class="form-control" placeholder="Search by name,category" />
+            </div>
+            <div class="col-md-auto">
+                <button type="submit" class="btn btn-primary">
+                    <i class="bi bi-search"></i> Search
+                </button>
+                <a asp-action="Index" class="btn btn-outline-secondary">
+                    <i class="bi bi-x-circle"></i> Clear
+                </a>
+            </div>
+        </form>
+    </div>
+    <div class="table-responsive">
+        <table class="table table-bordered table-hover table-striped">
+        <thead class="table-dark">
+            <tr>
+                <th>Name</th>
+                <th>Price</th>
+                <th>Stock</th>
+                <th>Category</th>
+                <th class="text-center">Action</th>
+            </tr>
+        </thead>
+        <tbody>
+                @if (!Model.Any())
+                {
+                    <tr>
+                        <td colspan="5" class="text-center text-muted">No products found.</td>
+                    </tr>
+                }
+            @foreach (var item in Model)
+            {
+                <tr>
+                    <td>@item.Name</td>
+                    <td>@item.Price.ToString("C", System.Globalization.CultureInfo.GetCultureInfo("en-IN"))</td>
+                    <td>
+                        @if (item.Stock < 20)
+                        {
+                            <span class="text-danger fw-bold">Limited (@item.Stock)</span>
+                        }
+                        else
+                        {
+                            <span class="text-success">@item.Stock</span>
+                        }
+                    </td>
+                    <td>@item.Category?.Name</td>
+                    <td class="text-center">
+                        <a asp-action="Details" asp-route-id="@item.ProductId" class="btn btn-info btn-sm me-1">
+                            <i class="bi bi-eye"></i> View
+                        </a>
+                        <a asp-action="UpdateStock" asp-route-id="@item.ProductId" class="btn btn-warning btn-sm me-1">
+                            <i class="bi bi-pencil-square"></i> Update Stock
+                        </a>
+                        <a asp-action="Delete" asp-route-id="@item.ProductId" class="btn btn-danger btn-sm">
+                            <i class="bi bi-trash"></i> Delete
+                        </a>
+                    </td>
+
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+</div>

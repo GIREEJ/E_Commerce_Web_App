@@ -1,0 +1,134 @@
+﻿@model IEnumerable<ECommerceWebApp.Models.Order>
+
+@{
+    ViewData["Title"] = "Manage Orders";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+    var currentSearch = ViewData["CurrentSearch"] as string;
+    var currentPage = (int)ViewData["CurrentPage"];
+    var totalPages = (int)ViewData["TotalPages"];
+}
+
+<div class="container my-5 p-5">
+   
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h2 class="mb-0">Manage Orders</h2>
+
+    </div>
+    <div>
+        <form asp-action="Index" method="get" class="row g-2 mb-3">
+            <div class="col-md-4">
+                <input type="text" name="name" value="@Context.Request.Query["name"]"
+                       class="form-control" placeholder="Search by name,category" />
+            </div>
+            <div class="col-md-auto">
+                <button type="submit" class="btn btn-primary">
+                    <i class="bi bi-search"></i> Search
+                </button>
+                <a asp-action="Index" class="btn btn-outline-secondary">
+                    <i class="bi bi-x-circle"></i> Clear
+                </a>
+            </div>
+        </form>
+    </div>
+
+    <!-- Table -->
+    <div class="table-responsive" style="max-height:450px; overflow-y:auto;">
+        <table class="table table-bordered table-hover table-striped align-middle">
+            <thead class="table-dark sticky-top">
+                <tr class="text-center">
+                    <th>
+                        <a asp-action="Index"
+                           asp-route-sortOrder="@(ViewData["OrderDateSortParm"])"
+                           asp-route-searchString="@currentSearch"
+                           asp-route-pageNumber="1"
+                           class="text-white text-decoration-none">
+                            @Html.DisplayNameFor(model => model.OrderDate)
+                            @* Add sort icons *@
+                            @if ((string)ViewData["CurrentSort"] == "")
+                            {
+                                <i class="bi bi-sort-up ms-1"></i>
+                            }
+                            else if ((string)ViewData["CurrentSort"] == "orderDate_desc")
+                            {
+                                <i class="bi bi-sort-down ms-1"></i>
+                            }
+                        </a>
+                    </th>
+                    <th>
+                        <a asp-action="Index"
+                           asp-route-sortOrder="@(ViewData["TotalAmountSortParm"])"
+                           asp-route-searchString="@currentSearch"
+                           asp-route-pageNumber="1"
+                           class="text-white text-decoration-none">
+                            @Html.DisplayNameFor(model => model.TotalAmount)
+                            @if ((string)ViewData["CurrentSort"] == "TotalAmount")
+                            {
+                                <i class="bi bi-sort-up ms-1"></i>
+                            }
+                            else if ((string)ViewData["CurrentSort"] == "totalAmount_desc")
+                            {
+                                <i class="bi bi-sort-down ms-1"></i>
+                            }
+                        </a>
+                    </th>
+                    <th>User ID</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                @if (!Model.Any())
+                {
+                    <tr>
+                        <td colspan="4" class="text-center text-muted">No orders found.</td>
+                    </tr>
+                }
+                else
+                {
+                    @foreach (var item in Model)
+                    {
+                        <tr class="text-center">
+                            <td>@item.OrderDate.ToString("dd MMM yyyy")</td>
+                            <td>₹@item.TotalAmount.ToString("F2")</td>
+                            <td>@item.User?.UserId</td>
+                            <td>
+                                <a asp-action="Details" asp-route-id="@item.OrderId" class="btn btn-info btn-sm me-1">
+                                    <i class="bi bi-eye"></i> View
+                                </a>
+                                <a asp-action="Delete" asp-route-id="@item.OrderId" class="btn btn-danger btn-sm">
+                                    <i class="bi bi-trash"></i> Delete
+                                </a>
+                            </td>
+                        </tr>
+                    }
+                }
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Pagination -->
+    @if (totalPages > 1)
+    {
+        <nav>
+            <ul class="pagination justify-content-center mt-3">
+                <li class="page-item @(currentPage == 1 ? "disabled" : "")">
+                    <a class="page-link" asp-action="Index"
+                       asp-route-searchString="@currentSearch" asp-route-pageNumber="@(currentPage - 1)">Previous</a>
+                </li>
+
+                @for (int i = 1; i <= totalPages; i++)
+                {
+                    <li class="page-item @(i == currentPage ? "active" : "")">
+                        <a class="page-link" asp-action="Index"
+                           asp-route-searchString="@currentSearch" asp-route-pageNumber="@i">@i</a>
+                    </li>
+                }
+
+                <li class="page-item @(currentPage == totalPages ? "disabled" : "")">
+                    <a class="page-link" asp-action="Index"
+                       asp-route-searchString="@currentSearch" asp-route-pageNumber="@(currentPage + 1)">Next</a>
+                </li>
+            </ul>
+        </nav>
+    }
+</div>
