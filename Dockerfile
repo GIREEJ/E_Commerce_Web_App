@@ -8,7 +8,7 @@ RUN dotnet restore
 
 # copy the rest of the code
 COPY . ./
-RUN dotnet publish -c Release -o /app/out
+RUN dotnet publish ECommerceWebApp.csproj -c Release -o /app/out
 
 # ---------- Runtime stage ----------
 FROM mcr.microsoft.com/dotnet/aspnet:8.0

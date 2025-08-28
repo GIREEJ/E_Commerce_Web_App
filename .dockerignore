@@ -1,0 +1,22 @@
+﻿# Ignore build output
+bin/
+obj/
+out/
+
+# Ignore Visual Studio files
+.vs/
+*.user
+*.suo
+
+# Ignore logs
+*.log
+
+# Ignore publish profiles
+Properties/PublishProfiles/
+
+# Ignore generated files
+*.dbmdl
+*.jfm
+*.db
+*.pdf
+*.swp
