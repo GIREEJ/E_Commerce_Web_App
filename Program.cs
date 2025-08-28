@@ -15,7 +15,9 @@ namespace ECommerceWebApp
             builder.Services.AddControllersWithViews();
 
             builder.Services.AddSession();
-            builder.Services.AddDbContext<AppDbContext>(options => options.UseSqlServer(builder.Configuration.GetConnectionString("EComDBConStr")));
+            //  builder.Services.AddDbContext<AppDbContext>(options => options.UseSqlServer(builder.Configuration.GetConnectionString("EComDBConStr")));
+            builder.Services.AddDbContext<AppDbContext>(options =>
+            options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
 
             builder.Services.AddScoped<IdGenerationService>();
             builder.Services.AddScoped<IPasswordService, PasswordService>();
